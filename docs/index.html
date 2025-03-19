@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>.white[.large[6.时间数据分析]]</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="" />
+    <script src="libs/header-attrs-2.25/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="zh-CN.css" type="text/css" />
+    <link rel="stylesheet" href="extra.css" type="text/css" />
+    <link rel="stylesheet" href="footer-header.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# .white[.large[<code>6.</code>时间数据分析]]
+]
+.author[
+### 
+]
+
+---
+
+
+layout: true
+  
+&lt;div class="my-footer"&gt;&lt;span&gt;Qiao-Guo Tan/CEE/XMU | tanqg@xmu.edu.cn | 2025-Mar-20   
+&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;
+&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;&amp;emsp;
+&lt;/span&gt;&lt;/div&gt; 
+
+---
+## 用到的程序包
+
+```r
+library(tidyverse) #作图
+library(readxl) #读取excel文件
+library(lubridate) #处理时间数据
+library(zoo) #使用`as.yearmon()`函数
+```
+
+---
+## 内容提要  
+
+### 1. 时间格式转化  
+### 2. 时间信息提取  
+### 3. 时间数据可视化  
+### 4. 时间序列分析简介  
+
+---
+class: inverse2, middle, center
+
+# 1. 时间格式转化  
+
+
+
+
+
+---
+
+## 字符串转化为日期格式：`ymd`系列函数   
+
+.pull-left[
+
+```r
+a &lt;- "20220318" # a是字符格式
+class(a)
+```
+
+```
+## [1] "character"
+```
+
+```r
+b &lt;- ymd(a) #将a转化为日期格式
+class(b)
+```
+
+```
+## [1] "Date"
+```
+
+```r
+# ymd，ydm，mdy，myd等系列函数，`?ymd`查看  
+mdy("03/18/2022") 
+```
+
+```
+## [1] "2022-03-18"
+```
+]
+
+--
+.pull-right[
+**使用`ymd`系列函数转化日期，输入日期格式较为自由，多种格式均能正确转化**  
+
+```r
+ymd("2022/03/18")
+```
+
+```
+## [1] "2022-03-18"
+```
+
+```r
+x &lt;- c(20090101, "2009-01-02", "2009 01 03", "2009-1-4", "2009-1, 5", "Created on 2009 1 6", "200901 !!! 07")
+ymd(x)
+```
+
+```
+## [1] "2009-01-01" "2009-01-02" "2009-01-03" "2009-01-04" "2009-01-05"
+## [6] "2009-01-06" "2009-01-07"
+```
+]
+
+---
+
+## 字符串转化为日期格式：`as.Date`和`date`函数  
+以下两个函数对输入日期格式有较严格要求
+
+```r
+as.Date("2022-03-12")  # 分隔号-
+```
+
+```
+## [1] "2022-03-12"
+```
+
+```r
+as.Date("2022/12/03") #分隔号/
+```
+
+```
+## [1] "2022-12-03"
+```
+
+```r
+date("2022-03-18") # 分隔号-
+```
+
+```
+## [1] "2022-03-18"
+```
+
+```r
+date("2022/03/18") #分隔号/
+```
+
+```
+## [1] "2022-03-18"
+```
+
+---
+## 字符串转化为日期-时间格式：`ymd_hms`系列函数
+
+
+```r
+ymd_hms("2011-06-05 12:00:00") #年月日 时分秒
+```
+
+```
+## [1] "2011-06-05 12:00:00 UTC"
+```
+
+```r
+ymd_hm("2011-06-05 12:23") #年月日 时分；秒自动设置为0
+```
+
+```
+## [1] "2011-06-05 12:23:00 UTC"
+```
+
+```r
+ymd_h("2011-06-05 12") #年月日 时；分秒自动设置为0
+```
+
+```
+## [1] "2011-06-05 12:00:00 UTC"
+```
+
+---
+class: inverse2, middle, center
+
+
+# 2. 时间信息提取  
+  
+---
+
+## 提取日期数据中的信息   
+
+.pull-left[
+
+```r
+today() #今天的日期 
+```
+
+```
+## [1] "2025-03-19"
+```
+
+```r
+x &lt;- today() 
+
+year(x) # 哪年？
+```
+
+```
+## [1] 2025
+```
+
+```r
+month(x) #哪月？
+```
+
+```
+## [1] 3
+```
+
+```r
+day(x) #哪日？
+```
+
+```
+## [1] 19
+```
+]
+
+--
+.pull-right[
+
+```r
+wday(x) #一个星期中的第几天？（默认星期天为第1天）
+```
+
+```
+## [1] 4
+```
+
+```r
+wday(x, week_start = 1) #一个星期中的第几天？以星期一为第1天
+```
+
+```
+## [1] 3
+```
+
+```r
+wday(x, label = T) #星期几？
+```
+
+```
+## [1] Wed
+## Levels: Sun &lt; Mon &lt; Tue &lt; Wed &lt; Thu &lt; Fri &lt; Sat
+```
+]
+
+---
+
+## 提取日期-时间数据中的信息  
+
+.pull-left[
+
+```r
+now() #现在时刻
+```
+
+```
+## [1] "2025-03-19 11:05:10 CST"
+```
+
+```r
+Sys.time() #电脑系统的现在时刻
+```
+
+```
+## [1] "2025-03-19 11:05:10 CST"
+```
+
+```r
+y &lt;- now()
+hour(y) #几时？
+```
+
+```
+## [1] 11
+```
+
+```r
+minute(y) #几分？
+```
+
+```
+## [1] 5
+```
+]
+
+--
+
+.pull-right[
+
+
+```r
+second(y)  #几秒？
+```
+
+```
+## [1] 10.87855
+```
+
+```r
+wday(y, week_start = 1, label = T ) #星期几？（文字表示）
+```
+
+```
+## [1] Wed
+## Levels: Mon &lt; Tue &lt; Wed &lt; Thu &lt; Fri &lt; Sat &lt; Sun
+```
+
+```r
+yday(y) #一年中的第几天？
+```
+
+```
+## [1] 78
+```
+
+```r
+week(y) #一年中的第几个星期？
+```
+
+```
+## [1] 12
+```
+]
+
+---
+
+## 时区  
+
+关于时区设置：`?locales`查询  
+关于时区名称，查看维基百科：
+https://en.wikipedia.org/wiki/List_of_tz_database_time_zones  
+
+
+```r
+Sys.timezone() #所在时区：亚洲/上海，即北京时间
+```
+
+```
+## [1] "Asia/Shanghai"
+```
+
+```r
+OlsonNames() #查询所有时区名称，该数据库由David Olson创立
+```
+
+```
+##   [1] "Africa/Abidjan"                   "Africa/Accra"                    
+##   [3] "Africa/Addis_Ababa"               "Africa/Algiers"                  
+##   [5] "Africa/Asmara"                    "Africa/Asmera"                   
+##   [7] "Africa/Bamako"                    "Africa/Bangui"                   
+##   [9] "Africa/Banjul"                    "Africa/Bissau"                   
+##  [11] "Africa/Blantyre"                  "Africa/Brazzaville"              
+##  [13] "Africa/Bujumbura"                 "Africa/Cairo"                    
+##  [15] "Africa/Casablanca"                "Africa/Ceuta"                    
+##  [17] "Africa/Conakry"                   "Africa/Dakar"                    
+##  [19] "Africa/Dar_es_Salaam"             "Africa/Djibouti"                 
+##  [21] "Africa/Douala"                    "Africa/El_Aaiun"                 
+##  [23] "Africa/Freetown"                  "Africa/Gaborone"                 
+##  [25] "Africa/Harare"                    "Africa/Johannesburg"             
+##  [27] "Africa/Juba"                      "Africa/Kampala"                  
+##  [29] "Africa/Khartoum"                  "Africa/Kigali"                   
+##  [31] "Africa/Kinshasa"                  "Africa/Lagos"                    
+##  [33] "Africa/Libreville"                "Africa/Lome"                     
+##  [35] "Africa/Luanda"                    "Africa/Lubumbashi"               
+##  [37] "Africa/Lusaka"                    "Africa/Malabo"                   
+##  [39] "Africa/Maputo"                    "Africa/Maseru"                   
+##  [41] "Africa/Mbabane"                   "Africa/Mogadishu"                
+##  [43] "Africa/Monrovia"                  "Africa/Nairobi"                  
+##  [45] "Africa/Ndjamena"                  "Africa/Niamey"                   
+##  [47] "Africa/Nouakchott"                "Africa/Ouagadougou"              
+##  [49] "Africa/Porto-Novo"                "Africa/Sao_Tome"                 
+##  [51] "Africa/Timbuktu"                  "Africa/Tripoli"                  
+##  [53] "Africa/Tunis"                     "Africa/Windhoek"                 
+##  [55] "America/Adak"                     "America/Anchorage"               
+##  [57] "America/Anguilla"                 "America/Antigua"                 
+##  [59] "America/Araguaina"                "America/Argentina/Buenos_Aires"  
+##  [61] "America/Argentina/Catamarca"      "America/Argentina/ComodRivadavia"
+##  [63] "America/Argentina/Cordoba"        "America/Argentina/Jujuy"         
+##  [65] "America/Argentina/La_Rioja"       "America/Argentina/Mendoza"       
+##  [67] "America/Argentina/Rio_Gallegos"   "America/Argentina/Salta"         
+##  [69] "America/Argentina/San_Juan"       "America/Argentina/San_Luis"      
+##  [71] "America/Argentina/Tucuman"        "America/Argentina/Ushuaia"       
+##  [73] "America/Aruba"                    "America/Asuncion"                
+##  [75] "America/Atikokan"                 "America/Atka"                    
+##  [77] "America/Bahia"                    "America/Bahia_Banderas"          
+##  [79] "America/Barbados"                 "America/Belem"                   
+##  [81] "America/Belize"                   "America/Blanc-Sablon"            
+##  [83] "America/Boa_Vista"                "America/Bogota"                  
+##  [85] "America/Boise"                    "America/Buenos_Aires"            
+##  [87] "America/Cambridge_Bay"            "America/Campo_Grande"            
+##  [89] "America/Cancun"                   "America/Caracas"                 
+##  [91] "America/Catamarca"                "America/Cayenne"                 
+##  [93] "America/Cayman"                   "America/Chicago"                 
+##  [95] "America/Chihuahua"                "America/Ciudad_Juarez"           
+##  [97] "America/Coral_Harbour"            "America/Cordoba"                 
+##  [99] "America/Costa_Rica"               "America/Creston"                 
+## [101] "America/Cuiaba"                   "America/Curacao"                 
+## [103] "America/Danmarkshavn"             "America/Dawson"                  
+## [105] "America/Dawson_Creek"             "America/Denver"                  
+## [107] "America/Detroit"                  "America/Dominica"                
+## [109] "America/Edmonton"                 "America/Eirunepe"                
+## [111] "America/El_Salvador"              "America/Ensenada"                
+## [113] "America/Fort_Nelson"              "America/Fort_Wayne"              
+## [115] "America/Fortaleza"                "America/Glace_Bay"               
+## [117] "America/Godthab"                  "America/Goose_Bay"               
+## [119] "America/Grand_Turk"               "America/Grenada"                 
+## [121] "America/Guadeloupe"               "America/Guatemala"               
+## [123] "America/Guayaquil"                "America/Guyana"                  
+## [125] "America/Halifax"                  "America/Havana"                  
+## [127] "America/Hermosillo"               "America/Indiana/Indianapolis"    
+## [129] "America/Indiana/Knox"             "America/Indiana/Marengo"         
+## [131] "America/Indiana/Petersburg"       "America/Indiana/Tell_City"       
+## [133] "America/Indiana/Vevay"            "America/Indiana/Vincennes"       
+## [135] "America/Indiana/Winamac"          "America/Indianapolis"            
+## [137] "America/Inuvik"                   "America/Iqaluit"                 
+## [139] "America/Jamaica"                  "America/Jujuy"                   
+## [141] "America/Juneau"                   "America/Kentucky/Louisville"     
+## [143] "America/Kentucky/Monticello"      "America/Knox_IN"                 
+## [145] "America/Kralendijk"               "America/La_Paz"                  
+## [147] "America/Lima"                     "America/Los_Angeles"             
+## [149] "America/Louisville"               "America/Lower_Princes"           
+## [151] "America/Maceio"                   "America/Managua"                 
+## [153] "America/Manaus"                   "America/Marigot"                 
+## [155] "America/Martinique"               "America/Matamoros"               
+## [157] "America/Mazatlan"                 "America/Mendoza"                 
+## [159] "America/Menominee"                "America/Merida"                  
+## [161] "America/Metlakatla"               "America/Mexico_City"             
+## [163] "America/Miquelon"                 "America/Moncton"                 
+## [165] "America/Monterrey"                "America/Montevideo"              
+## [167] "America/Montreal"                 "America/Montserrat"              
+## [169] "America/Nassau"                   "America/New_York"                
+## [171] "America/Nipigon"                  "America/Nome"                    
+## [173] "America/Noronha"                  "America/North_Dakota/Beulah"     
+## [175] "America/North_Dakota/Center"      "America/North_Dakota/New_Salem"  
+## [177] "America/Nuuk"                     "America/Ojinaga"                 
+## [179] "America/Panama"                   "America/Pangnirtung"             
+## [181] "America/Paramaribo"               "America/Phoenix"                 
+## [183] "America/Port_of_Spain"            "America/Port-au-Prince"          
+## [185] "America/Porto_Acre"               "America/Porto_Velho"             
+## [187] "America/Puerto_Rico"              "America/Punta_Arenas"            
+## [189] "America/Rainy_River"              "America/Rankin_Inlet"            
+## [191] "America/Recife"                   "America/Regina"                  
+## [193] "America/Resolute"                 "America/Rio_Branco"              
+## [195] "America/Rosario"                  "America/Santa_Isabel"            
+## [197] "America/Santarem"                 "America/Santiago"                
+## [199] "America/Santo_Domingo"            "America/Sao_Paulo"               
+## [201] "America/Scoresbysund"             "America/Shiprock"                
+## [203] "America/Sitka"                    "America/St_Barthelemy"           
+## [205] "America/St_Johns"                 "America/St_Kitts"                
+## [207] "America/St_Lucia"                 "America/St_Thomas"               
+## [209] "America/St_Vincent"               "America/Swift_Current"           
+## [211] "America/Tegucigalpa"              "America/Thule"                   
+## [213] "America/Thunder_Bay"              "America/Tijuana"                 
+## [215] "America/Toronto"                  "America/Tortola"                 
+## [217] "America/Vancouver"                "America/Virgin"                  
+## [219] "America/Whitehorse"               "America/Winnipeg"                
+## [221] "America/Yakutat"                  "America/Yellowknife"             
+## [223] "Antarctica/Casey"                 "Antarctica/Davis"                
+## [225] "Antarctica/DumontDUrville"        "Antarctica/Macquarie"            
+## [227] "Antarctica/Mawson"                "Antarctica/McMurdo"              
+## [229] "Antarctica/Palmer"                "Antarctica/Rothera"              
+## [231] "Antarctica/South_Pole"            "Antarctica/Syowa"                
+## [233] "Antarctica/Troll"                 "Antarctica/Vostok"               
+## [235] "Arctic/Longyearbyen"              "Asia/Aden"                       
+## [237] "Asia/Almaty"                      "Asia/Amman"                      
+## [239] "Asia/Anadyr"                      "Asia/Aqtau"                      
+## [241] "Asia/Aqtobe"                      "Asia/Ashgabat"                   
+## [243] "Asia/Ashkhabad"                   "Asia/Atyrau"                     
+## [245] "Asia/Baghdad"                     "Asia/Bahrain"                    
+## [247] "Asia/Baku"                        "Asia/Bangkok"                    
+## [249] "Asia/Barnaul"                     "Asia/Beirut"                     
+## [251] "Asia/Bishkek"                     "Asia/Brunei"                     
+## [253] "Asia/Calcutta"                    "Asia/Chita"                      
+## [255] "Asia/Choibalsan"                  "Asia/Chongqing"                  
+## [257] "Asia/Chungking"                   "Asia/Colombo"                    
+## [259] "Asia/Dacca"                       "Asia/Damascus"                   
+## [261] "Asia/Dhaka"                       "Asia/Dili"                       
+## [263] "Asia/Dubai"                       "Asia/Dushanbe"                   
+## [265] "Asia/Famagusta"                   "Asia/Gaza"                       
+## [267] "Asia/Harbin"                      "Asia/Hebron"                     
+## [269] "Asia/Ho_Chi_Minh"                 "Asia/Hong_Kong"                  
+## [271] "Asia/Hovd"                        "Asia/Irkutsk"                    
+## [273] "Asia/Istanbul"                    "Asia/Jakarta"                    
+## [275] "Asia/Jayapura"                    "Asia/Jerusalem"                  
+## [277] "Asia/Kabul"                       "Asia/Kamchatka"                  
+## [279] "Asia/Karachi"                     "Asia/Kashgar"                    
+## [281] "Asia/Kathmandu"                   "Asia/Katmandu"                   
+## [283] "Asia/Khandyga"                    "Asia/Kolkata"                    
+## [285] "Asia/Krasnoyarsk"                 "Asia/Kuala_Lumpur"               
+## [287] "Asia/Kuching"                     "Asia/Kuwait"                     
+## [289] "Asia/Macao"                       "Asia/Macau"                      
+## [291] "Asia/Magadan"                     "Asia/Makassar"                   
+## [293] "Asia/Manila"                      "Asia/Muscat"                     
+## [295] "Asia/Nicosia"                     "Asia/Novokuznetsk"               
+## [297] "Asia/Novosibirsk"                 "Asia/Omsk"                       
+## [299] "Asia/Oral"                        "Asia/Phnom_Penh"                 
+## [301] "Asia/Pontianak"                   "Asia/Pyongyang"                  
+## [303] "Asia/Qatar"                       "Asia/Qostanay"                   
+## [305] "Asia/Qyzylorda"                   "Asia/Rangoon"                    
+## [307] "Asia/Riyadh"                      "Asia/Saigon"                     
+## [309] "Asia/Sakhalin"                    "Asia/Samarkand"                  
+## [311] "Asia/Seoul"                       "Asia/Shanghai"                   
+## [313] "Asia/Singapore"                   "Asia/Srednekolymsk"              
+## [315] "Asia/Taipei"                      "Asia/Tashkent"                   
+## [317] "Asia/Tbilisi"                     "Asia/Tehran"                     
+## [319] "Asia/Tel_Aviv"                    "Asia/Thimbu"                     
+## [321] "Asia/Thimphu"                     "Asia/Tokyo"                      
+## [323] "Asia/Tomsk"                       "Asia/Ujung_Pandang"              
+## [325] "Asia/Ulaanbaatar"                 "Asia/Ulan_Bator"                 
+## [327] "Asia/Urumqi"                      "Asia/Ust-Nera"                   
+## [329] "Asia/Vientiane"                   "Asia/Vladivostok"                
+## [331] "Asia/Yakutsk"                     "Asia/Yangon"                     
+## [333] "Asia/Yekaterinburg"               "Asia/Yerevan"                    
+## [335] "Atlantic/Azores"                  "Atlantic/Bermuda"                
+## [337] "Atlantic/Canary"                  "Atlantic/Cape_Verde"             
+## [339] "Atlantic/Faeroe"                  "Atlantic/Faroe"                  
+## [341] "Atlantic/Jan_Mayen"               "Atlantic/Madeira"                
+## [343] "Atlantic/Reykjavik"               "Atlantic/South_Georgia"          
+## [345] "Atlantic/St_Helena"               "Atlantic/Stanley"                
+## [347] "Australia/ACT"                    "Australia/Adelaide"              
+## [349] "Australia/Brisbane"               "Australia/Broken_Hill"           
+## [351] "Australia/Canberra"               "Australia/Currie"                
+## [353] "Australia/Darwin"                 "Australia/Eucla"                 
+## [355] "Australia/Hobart"                 "Australia/LHI"                   
+## [357] "Australia/Lindeman"               "Australia/Lord_Howe"             
+## [359] "Australia/Melbourne"              "Australia/North"                 
+## [361] "Australia/NSW"                    "Australia/Perth"                 
+## [363] "Australia/Queensland"             "Australia/South"                 
+## [365] "Australia/Sydney"                 "Australia/Tasmania"              
+## [367] "Australia/Victoria"               "Australia/West"                  
+## [369] "Australia/Yancowinna"             "Brazil/Acre"                     
+## [371] "Brazil/DeNoronha"                 "Brazil/East"                     
+## [373] "Brazil/West"                      "Canada/Atlantic"                 
+## [375] "Canada/Central"                   "Canada/Eastern"                  
+## [377] "Canada/Mountain"                  "Canada/Newfoundland"             
+## [379] "Canada/Pacific"                   "Canada/Saskatchewan"             
+## [381] "Canada/Yukon"                     "CET"                             
+## [383] "Chile/Continental"                "Chile/EasterIsland"              
+## [385] "CST6CDT"                          "Cuba"                            
+## [387] "EET"                              "Egypt"                           
+## [389] "Eire"                             "EST"                             
+## [391] "EST5EDT"                          "Etc/GMT"                         
+## [393] "Etc/GMT-0"                        "Etc/GMT-1"                       
+## [395] "Etc/GMT-10"                       "Etc/GMT-11"                      
+## [397] "Etc/GMT-12"                       "Etc/GMT-13"                      
+## [399] "Etc/GMT-14"                       "Etc/GMT-2"                       
+## [401] "Etc/GMT-3"                        "Etc/GMT-4"                       
+## [403] "Etc/GMT-5"                        "Etc/GMT-6"                       
+## [405] "Etc/GMT-7"                        "Etc/GMT-8"                       
+## [407] "Etc/GMT-9"                        "Etc/GMT+0"                       
+## [409] "Etc/GMT+1"                        "Etc/GMT+10"                      
+## [411] "Etc/GMT+11"                       "Etc/GMT+12"                      
+## [413] "Etc/GMT+2"                        "Etc/GMT+3"                       
+## [415] "Etc/GMT+4"                        "Etc/GMT+5"                       
+## [417] "Etc/GMT+6"                        "Etc/GMT+7"                       
+## [419] "Etc/GMT+8"                        "Etc/GMT+9"                       
+## [421] "Etc/GMT0"                         "Etc/Greenwich"                   
+## [423] "Etc/UCT"                          "Etc/Universal"                   
+## [425] "Etc/UTC"                          "Etc/Zulu"                        
+## [427] "Europe/Amsterdam"                 "Europe/Andorra"                  
+## [429] "Europe/Astrakhan"                 "Europe/Athens"                   
+## [431] "Europe/Belfast"                   "Europe/Belgrade"                 
+## [433] "Europe/Berlin"                    "Europe/Bratislava"               
+## [435] "Europe/Brussels"                  "Europe/Bucharest"                
+## [437] "Europe/Budapest"                  "Europe/Busingen"                 
+## [439] "Europe/Chisinau"                  "Europe/Copenhagen"               
+## [441] "Europe/Dublin"                    "Europe/Gibraltar"                
+## [443] "Europe/Guernsey"                  "Europe/Helsinki"                 
+## [445] "Europe/Isle_of_Man"               "Europe/Istanbul"                 
+## [447] "Europe/Jersey"                    "Europe/Kaliningrad"              
+## [449] "Europe/Kiev"                      "Europe/Kirov"                    
+## [451] "Europe/Kyiv"                      "Europe/Lisbon"                   
+## [453] "Europe/Ljubljana"                 "Europe/London"                   
+## [455] "Europe/Luxembourg"                "Europe/Madrid"                   
+## [457] "Europe/Malta"                     "Europe/Mariehamn"                
+## [459] "Europe/Minsk"                     "Europe/Monaco"                   
+## [461] "Europe/Moscow"                    "Europe/Nicosia"                  
+## [463] "Europe/Oslo"                      "Europe/Paris"                    
+## [465] "Europe/Podgorica"                 "Europe/Prague"                   
+## [467] "Europe/Riga"                      "Europe/Rome"                     
+## [469] "Europe/Samara"                    "Europe/San_Marino"               
+## [471] "Europe/Sarajevo"                  "Europe/Saratov"                  
+## [473] "Europe/Simferopol"                "Europe/Skopje"                   
+## [475] "Europe/Sofia"                     "Europe/Stockholm"                
+## [477] "Europe/Tallinn"                   "Europe/Tirane"                   
+## [479] "Europe/Tiraspol"                  "Europe/Ulyanovsk"                
+## [481] "Europe/Uzhgorod"                  "Europe/Vaduz"                    
+## [483] "Europe/Vatican"                   "Europe/Vienna"                   
+## [485] "Europe/Vilnius"                   "Europe/Volgograd"                
+## [487] "Europe/Warsaw"                    "Europe/Zagreb"                   
+## [489] "Europe/Zaporozhye"                "Europe/Zurich"                   
+## [491] "Factory"                          "GB"                              
+## [493] "GB-Eire"                          "GMT"                             
+## [495] "GMT-0"                            "GMT+0"                           
+## [497] "GMT0"                             "Greenwich"                       
+## [499] "Hongkong"                         "HST"                             
+## [501] "Iceland"                          "Indian/Antananarivo"             
+## [503] "Indian/Chagos"                    "Indian/Christmas"                
+## [505] "Indian/Cocos"                     "Indian/Comoro"                   
+## [507] "Indian/Kerguelen"                 "Indian/Mahe"                     
+## [509] "Indian/Maldives"                  "Indian/Mauritius"                
+## [511] "Indian/Mayotte"                   "Indian/Reunion"                  
+## [513] "Iran"                             "Israel"                          
+## [515] "Jamaica"                          "Japan"                           
+## [517] "Kwajalein"                        "Libya"                           
+## [519] "MET"                              "Mexico/BajaNorte"                
+## [521] "Mexico/BajaSur"                   "Mexico/General"                  
+## [523] "MST"                              "MST7MDT"                         
+## [525] "Navajo"                           "NZ"                              
+## [527] "NZ-CHAT"                          "Pacific/Apia"                    
+## [529] "Pacific/Auckland"                 "Pacific/Bougainville"            
+## [531] "Pacific/Chatham"                  "Pacific/Chuuk"                   
+## [533] "Pacific/Easter"                   "Pacific/Efate"                   
+## [535] "Pacific/Enderbury"                "Pacific/Fakaofo"                 
+## [537] "Pacific/Fiji"                     "Pacific/Funafuti"                
+## [539] "Pacific/Galapagos"                "Pacific/Gambier"                 
+## [541] "Pacific/Guadalcanal"              "Pacific/Guam"                    
+## [543] "Pacific/Honolulu"                 "Pacific/Johnston"                
+## [545] "Pacific/Kanton"                   "Pacific/Kiritimati"              
+## [547] "Pacific/Kosrae"                   "Pacific/Kwajalein"               
+## [549] "Pacific/Majuro"                   "Pacific/Marquesas"               
+## [551] "Pacific/Midway"                   "Pacific/Nauru"                   
+## [553] "Pacific/Niue"                     "Pacific/Norfolk"                 
+## [555] "Pacific/Noumea"                   "Pacific/Pago_Pago"               
+## [557] "Pacific/Palau"                    "Pacific/Pitcairn"                
+## [559] "Pacific/Pohnpei"                  "Pacific/Ponape"                  
+## [561] "Pacific/Port_Moresby"             "Pacific/Rarotonga"               
+## [563] "Pacific/Saipan"                   "Pacific/Samoa"                   
+## [565] "Pacific/Tahiti"                   "Pacific/Tarawa"                  
+## [567] "Pacific/Tongatapu"                "Pacific/Truk"                    
+## [569] "Pacific/Wake"                     "Pacific/Wallis"                  
+## [571] "Pacific/Yap"                      "Poland"                          
+## [573] "Portugal"                         "PRC"                             
+## [575] "PST8PDT"                          "ROC"                             
+## [577] "ROK"                              "Singapore"                       
+## [579] "Turkey"                           "UCT"                             
+## [581] "Universal"                        "US/Alaska"                       
+## [583] "US/Aleutian"                      "US/Arizona"                      
+## [585] "US/Central"                       "US/East-Indiana"                 
+## [587] "US/Eastern"                       "US/Hawaii"                       
+## [589] "US/Indiana-Starke"                "US/Michigan"                     
+## [591] "US/Mountain"                      "US/Pacific"                      
+## [593] "US/Samoa"                         "UTC"                             
+## [595] "W-SU"                             "WET"                             
+## [597] "Zulu"                            
+## attr(,"Version")
+## [1] "2025a"
+```
+
+---
+
+## 时区  
+
+
+```r
+ymd_hms(now(), tz = "PRC") #将时间信息的时区设置为中国
+```
+
+```
+## [1] "2025-03-19 11:05:10 CST"
+```
+
+```r
+with_tz(now(), tz="Europe/Berlin") #查看其他时区对应的时间，例如柏林
+```
+
+```
+## [1] "2025-03-19 04:05:10 CET"
+```
+
+---
+
+## 时间计算  
+
+.pull-left[
+
+
+```r
+now() #现在时间 
+```
+
+```
+## [1] "2025-03-19 11:05:10 CST"
+```
+
+```r
+end &lt;- paste(today(), "23:59:59") #今天的最后1秒
+class(end) #是字符串，不是时间格式
+```
+
+```
+## [1] "character"
+```
+
+```r
+end &lt;- ymd_hms(end) #转化为时间格式
+#今天还剩下多少时间  
+end - now() # 计算两点间的时间长度；有误，时区不同导致
+```
+
+```
+## Time difference of 20.91335 hours
+```
+]
+
+--
+
+.pull-right[
+
+
+```r
+end &lt;- ymd_hms(end, tz="PRC") #时区设置为中国
+end - now() #计算两点间的时间长度；正确
+```
+
+```
+## Time difference of 12.91334 hours
+```
+
+```r
+difftime(end, now()) #另一种方法，计算两点间的时间长度
+```
+
+```
+## Time difference of 12.91334 hours
+```
+
+```r
+today()-ymd(19820704) #我出生多少天了
+```
+
+```
+## Time difference of 15599 days
+```
+]
+
+
+---
+class: inverse2, middle, center
+
+  
+# 3. 时间数据可视化  
+
+
+---
+## 厦门空气质量数据分析  
+
+数据来源：https://quotsoft.net/air/   
+
+已下载并整理出厦门2018-2021四年的空气质量数据（csv格式）。  
+
+数据下载地址：https://pan.baidu.com/s/17b0lqpdGeQQtVRb5vnCatw?pwd=3t8h  
+或：https://github.com/tan-qiao-guo/environmental_data_analysis_and_visualization/tree/main/xiamen%20air 
+
+**读取并查看数据：**   
+
+```r
+d2021 &lt;- read.csv("xiamen air/xiamen_air_2021.csv") #读取2021年的数据
+names(d2021) #包含PM2.5，PM10，NO2，SO2， O3， CO等污染物，以及日期、小时、AQI等信息
+```
+
+```
+##  [1] "X"         "hour"      "AQI"       "PM2.5"     "PM2.5_24h" "PM10"     
+##  [7] "PM10_24h"  "SO2"       "SO2_24h"   "NO2"       "NO2_24h"   "O3"       
+## [13] "O3_24h"    "O3_8h"     "O3_8h_24h" "CO"        "CO_24h"    "date"
+```
+
+---
+## 时间序列数据的可视化 
+### 2021年厦门PM2.5逐日变化趋势  
+```r
+d2021 %&gt;%
+  mutate(date = ymd(date)) %&gt;%  #将date转化为日期格式（原为字符格式）
+  ggplot(aes(date, PM2.5)) +
+  geom_point()+ #所有点，每个小时1个点
+  stat_summary(geom="line", fun="mean", color="red") #日均值线
+  
+ggsave("xiamen_2021_PM2.5_p1.png", width=642/90, height=336/90, dpi=600)
+```
+
+---
+### 2021年厦门PM2.5逐日变化趋势  
+&lt;img src="figs/xiamen_2021_PM2.5_p1.png" width="963" height="504" /&gt;
+
+---
+### 2021年厦门PM2.5逐日变化趋势：调整细节  
+
+```r
+d2021 %&gt;%
+  mutate(date = ymd(date)) %&gt;% 
+  ggplot(aes(date, PM2.5)) +
+  theme_classic()+
+  geom_point(size=0.3, alpha=0.7, color="grey")+
+  stat_summary(geom="line", fun="mean", color="red2")+ 
+* scale_x_date(date_labels = "%m/%d", breaks = "1 month")+ 
+#x轴时间格式设置，格式设置更多选择，查看?strptime(见下下页)
+  labs(x = "Date",
+       y = ~PM[2.5]~'('*mu*g~m^'-3'*')',
+       title = "Xiamen, 2021")
+ggsave("xiamen_2021_PM2.5_p2.png", width=642/90, height=336/90, dpi=600)
+```
+
+---
+### 2021年厦门PM2.5逐日变化趋势：调整细节  
+&lt;img src="figs/xiamen_2021_PM2.5_p2.png" width="963" height="504" /&gt;
+
+---
+## `?strptime`查看日期时间格式 
+
+* `?strptime`查看日期时间的各种表示方式，以下仅摘录部分
+* 将以下.red[`%b`]、.red[`%B`]等格式代码填入上一页作图代码`scale_x_date(date_labels = `.red[`"xxx"`]`)`，试试效果    
+
+.red[`%b`]
+Abbreviated month name in the current locale on this platform. (Also matches full name on input: in some locales there are no abbreviations of names.) .red[月份文字缩写]
+
+.red[`%B`]
+Full month name in the current locale. (Also matches abbreviated name on input.) .red[月份文字全称]
+
+.red[`%d`]
+Day of the month as decimal number (01–31).
+
+.red[`%D`]
+Date format such as %m/%d/%y: the C99 standard says it should be that exact format (but not all OSes comply). .red[MM/DD/YY格式]
+
+.red[`%F`]
+Equivalent to %Y-%m-%d (the ISO 8601 date format).
+
+.red[`%m`]
+Month as decimal number (01–12). .red[月份，两位数表示]
+
+.red[`%x`]
+Date. Locale-specific on output, "%y/%m/%d" on input.
+
+---
+
+## 日期时间格式的表述  
+
+查看`?strptime`页面信息或上一页节选信息，尝试各种格式   
+
+
+.pull-left[
+
+```r
+format(today(), format = "%Y-%B-%d")
+```
+
+```
+## [1] "2025-March-19"
+```
+
+```r
+format(today(), format = "%Y/%b/%d")
+```
+
+```
+## [1] "2025/Mar/19"
+```
+
+```r
+format(today(), format = "%x")
+```
+
+```
+## [1] "03/19/2025"
+```
+
+```r
+format(today(), format = "%F")
+```
+
+```
+## [1] "2025-03-19"
+```
+]
+
+.pull-right[
+
+```r
+format(today(), format = "%m-%d")
+```
+
+```
+## [1] "03-19"
+```
+
+```r
+format(today(), format = "%D")
+```
+
+```
+## [1] "03/19/25"
+```
+]
+
+
+---
+## 合并四年数据用于分析  
+
+
+```r
+d2018 &lt;- read.csv("xiamen air/xiamen_air_2018.csv")
+d2019 &lt;- read.csv("xiamen air/xiamen_air_2019.csv")
+d2020 &lt;- read.csv("xiamen air/xiamen_air_2020.csv")
+d2021 &lt;- read.csv("xiamen air/xiamen_air_2021.csv")
+
+d0 &lt;- rbind(d2018, d2019, d2020, d2021)
+dim(d0) #34330条数据；(4年应该有365.25*24*4 = 35064条，说明缺失几天数据）
+```
+
+```
+## [1] 34330    18
+```
+
+
+---
+
+### 了解合并数据的结构，尤其是数据类型  
+
+```r
+str(d0)
+```
+
+```
+## 'data.frame':	34330 obs. of  18 variables:
+##  $ X        : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ hour     : int  0 1 2 3 4 5 6 7 8 9 ...
+##  $ AQI      : int  81 84 87 NA NA NA NA NA NA NA ...
+##  $ PM2.5    : int  53 54 59 NA NA NA NA NA NA NA ...
+##  $ PM2.5_24h: int  45 46 47 NA NA NA NA NA NA NA ...
+##  $ PM10     : int  111 117 123 NA NA NA NA NA NA NA ...
+##  $ PM10_24h : int  83 85 88 NA NA NA NA NA NA NA ...
+##  $ SO2      : int  14 14 15 NA NA NA NA NA NA NA ...
+##  $ SO2_24h  : int  12 13 13 NA NA NA NA NA NA NA ...
+##  $ NO2      : int  21 20 18 NA NA NA NA NA NA NA ...
+##  $ NO2_24h  : int  32 31 31 NA NA NA NA NA NA NA ...
+##  $ O3       : int  78 83 90 NA NA NA NA NA NA NA ...
+##  $ O3_24h   : int  78 83 90 NA NA NA NA NA NA NA ...
+##  $ O3_8h    : int  67 83 86 NA NA NA NA NA NA NA ...
+##  $ O3_8h_24h: int  67 83 86 NA NA NA NA NA NA NA ...
+##  $ CO       : num  0.83 0.8 0.77 NA NA NA NA NA NA NA ...
+##  $ CO_24h   : num  0.77 0.77 0.77 NA NA NA NA NA NA NA ...
+##  $ date     : int  20180101 20180101 20180101 20180101 20180101 20180101 20180101 20180101 20180101 20180101 ...
+```
+
+---
+## 数据整理  
+目前存在问题：（1）`date`还不是日期格式；（2）没有完整的日期时间列
+
+
+```r
+d &lt;- d0 %&gt;% 
+  mutate(time_ymdh = ymd_h(paste(date, hour))) #用ymd_h生成“年月日时”列
+
+sample(d$time_ymdh, 10) #随机选10个查看，确认已是时间格式
+```
+
+```
+##  [1] "2021-03-31 17:00:00 UTC" "2019-11-29 23:00:00 UTC"
+##  [3] "2021-03-29 19:00:00 UTC" "2018-02-21 22:00:00 UTC"
+##  [5] "2020-10-23 13:00:00 UTC" "2018-09-30 22:00:00 UTC"
+##  [7] "2020-01-25 14:00:00 UTC" "2021-10-26 04:00:00 UTC"
+##  [9] "2018-07-23 08:00:00 UTC" "2021-05-18 02:00:00 UTC"
+```
+
+```r
+class(d$time_ymdh) #查看格式，确认是时间格式
+```
+
+```
+## [1] "POSIXct" "POSIXt"
+```
+.green[POSIXct = Portable Operating System Interface for Unix calendar time]
+
+???
+Portable Operating System Interface for Unix calendar time
+
+---
+
+## 缺哪天的数据？  
+用数据可视化的方式，快速找出缺失数据的位置
+```r
+
+d %&gt;% 
+*  mutate(year = year(time_ymdh), #生成年列
+*         month = month(time_ymdh), #生成月份列
+*         day = day(time_ymdh)) %&gt;%  #生成日列
+ggplot(aes(x = day, y = month, z = PM2.5))+
+*  geom_raster(alpha = 0.5,fill = "blue")+ #作栅格图，找到缺失格
+  facet_wrap(~year)+
+  scale_x_continuous(breaks = 1:31)+
+  scale_y_continuous(breaks = 1:12)+
+  theme(panel.grid.minor = element_blank())
+
+```
+
+---
+
+## 缺哪天的数据？  
+缺2018年12月22-26日和2019年8月24日数据。  
+可从其他渠道获取数据，将缺失数据补齐。我们暂且忽略缺失数据，继续分析。  
+&lt;img src="figs/xiamen_missdata.png" width="948" height="437" /&gt;
+
+
+
+---
+## 总体趋势：厦门AQI的4年趋势
+```r
+d %&gt;% 
+*  ggplot(aes(time_ymdh, AQI))+ #time_ymdh是日期时间格式，可作为x变量
+  geom_line()+
+  geom_smooth(se=F) #去除置信区间阴影
+
+ggsave("xiamen_4y_p1.png", width=642/90, height=336/90, dpi=600)
+```
+---
+## 总体趋势：厦门AQI的4年趋势
+AQI总体稳定在50上下，可见明显的季节波动。空气质量为优的天数在增加，为污染的天数明显减少。  
+注：AQI = 0-50是优，51-100是良，101-150是轻度污染，151-200是中度污染，201-300是重度污染，300+是严重污染
+
+&lt;img src="figs/xiamen_4y_p1.png" width="770.4" height="403.2" /&gt;
+
+---
+## 总体趋势：一并查看6项指标  
+```r
+d %&gt;% 
+  select(time_ymdh, PM2.5, PM10, SO2, NO2, O3, CO) %&gt;%  #选出6项指标
+  pivot_longer(cols=2:7, names_to = "parameter", values_to = "value") %&gt;%  #将宽表格转为长表格，要转的数据在2-7列
+  ggplot(aes(time_ymdh, value))+
+  geom_line()+
+  facet_wrap(~parameter, scales="free_y")+
+  geom_smooth(se=F)
+
+ggsave("xiamen_4y_p2.png", width=642/90, height=336/90, dpi=600)
+```
+---
+## 总体趋势：一并查看6项指标  
+（1）CO、NO2、PM10、PM2.5、SO2浓度总体下降，极端值频率降低；（2）O3总体稳定；（3）季节波动明显
+&lt;img src="figs/xiamen_4y_p2.png" width="834.6" height="436.8" /&gt;
+
+---
+## 细看季节趋势：PM2.5  
+将4年数据分开看，计算每日PM2.5均值，查看PM2.5均值在一年中的逐日变化趋势。  
+
+```r
+d %&gt;% 
+  mutate(year = year(time_ymdh), #新增列：年份
+         time_d = yday(time_ymdh)) %&gt;% #新增列：一年中的第几天
+  group_by(year, time_d) %&gt;%  #按某年的某日分组
+*  summarise(mean = mean(PM2.5, na.rm = T)) %&gt;%  #计算PM2.5均值，注意去除缺失值
+  ggplot(aes(time_d, mean, color=factor(year)))+
+  geom_line()+
+  facet_wrap(~year)+
+  geom_smooth(se=F)+
+  guides(color="none") #去除多余的颜色图例
+ggsave("xiamen_4y_p3.png", width=642/90, height=336/90, dpi=600)
+```
+---
+## 细看季节趋势：PM2.5  
+可以看到：PM2.5在冬春季节较高，夏秋季节较低，第200天左右（即7月份）达到最低值。    
+
+&lt;img src="figs/xiamen_4y_p3.png" width="642" height="336" /&gt;
+
+尝试一下：把PM2.5换成其他参数
+---
+## 细看各个月份：各月份的PM2.5概率密度分布    
+```r
+
+d %&gt;% 
+  mutate(month=month(time_ymdh)) %&gt;% 
+  ggplot(aes(x=PM2.5))+
+  theme_bw()+
+*  geom_density(aes(color=factor(month))) #概率密度图，颜色映射到月份
+
+ggsave("xiamen_4y_p4.png", width=472/90, height=330/90, dpi=600)
+```
+
+---
+## 细看各个月份：各月份的PM2.5概率密度分布  
+各月份有明显区别，但混在一起，较难分辨  
+
+&lt;img src="figs/xiamen_4y_p4.png" width="613.6" height="429" /&gt;
+
+---
+## 对比各月份与总体的PM2.5概率密度分布   
+
+```r
+label_month &lt;- month.name # month.name是12个月份的名称，敲一下看看
+names(label_month) &lt;- as.character(1:12) #用于将1-12月修改为January-December
+
+d %&gt;% 
+  mutate(month=month(time_ymdh)) %&gt;% 
+  ggplot(aes(x=PM2.5))+
+  theme_bw()+
+  facet_wrap(~month,labeller = labeller(month = label_month))+
+*  geom_density(data=d, fill="grey80", alpha=0.3)+ #所有月份的数据（d中不含month列，不会被分面）
+*  geom_density(fill="red", color="red", alpha=0.2)+ #单独各个月份的数据（含month列，会被分面）
+  labs(x=~PM[2.5]~'('*mu*g~m^'-3'*')',
+       y="Probability density")
+       
+ggsave("xiamen_4y_p5.png", width=472/90, height=330/90, dpi=600)
+```
+
+---
+## 对比各月份与总体的PM2.5概率密度分布  
+PM2.5浓度概率密度分布：黑色是总体的分布，红色是各个月份的分布。  
+1-4月往右拖尾，PM2.5污染高于总体均值。6-8月污染低于总体均值。  
+
+&lt;img src="figs/xiamen_4y_p5.png" width="660.8" height="462" /&gt;
+
+---
+## 季节趋势：总览全部参数  
+```r
+d %&gt;% 
+  select(time_ymdh, PM2.5, PM10, SO2, NO2, O3, CO) %&gt;% 
+  mutate(year = year(time_ymdh),
+         time_d = yday(time_ymdh)) %&gt;% 
+  pivot_longer(cols=2:7, names_to = "parameter", values_to = "value") %&gt;% 
+  ggplot(aes(time_d, value, color=factor(year)))+
+  geom_line(alpha=0.4)+
+  facet_grid(parameter~year, scales="free")+
+  geom_smooth(se=F)+
+  guides(color="none")
+
+ggsave("xiamen_4y_p6.png", width=642/90, height=336/90, dpi=600)
+```
+---
+## 季节趋势：总览全部参数   
+&lt;img src="figs/xiamen_4y_p6.png" width="963" height="504" /&gt;
+
+---
+
+## 工作日-周末趋势：PM2.5   
+
+```r
+d %&gt;% 
+  mutate(weekday = wday(time_ymdh, week_start = 1, label = T),
+         month=month(time_ymdh)) %&gt;% 
+  ggplot(aes(weekday, PM2.5))+
+  geom_boxplot()
+
+ggsave("xiamen_4y_p7.png", width=460/90, height=400/90, dpi=600)  
+```
+
+---
+
+## 工作日-周末趋势：PM2.5   
+
+周末和工作日PM2.5没有明显区别，周末和周一的PM2.5高值较少    
+&lt;img src="figs/xiamen_4y_p7b.png" width="552" height="480" /&gt;
+
+---
+## 昼夜趋势：臭氧  
+
+```r
+d %&gt;% 
+  select(time_ymdh, PM2.5, PM10, SO2, NO2, O3, CO) %&gt;% 
+  mutate(year = year(time_ymdh),
+         time_d = yday(time_ymdh),
+         time_h = hour(time_ymdh)) %&gt;% 
+*  ggplot(aes(time_h, O3, group=time_d))+ #用group将每天的数据分组，每天单独画一条线
+  geom_line(alpha=0.1, color="red2")+
+  facet_wrap(~year)
+
+ggsave("xiamen_O3_p1.png", width=642/90, height=336/90, dpi=600) 
+```
+---
+## 昼夜趋势：臭氧  
+
+臭氧浓度有明显的昼夜变化趋势，上午10点后上升，15点左右达到最高值。  
+
+&lt;img src="figs/xiamen_O3_p1.png" width="834.6" height="436.8" /&gt;
+
+---
+## 昼夜趋势：臭氧  
+
+```r
+#计算整体的各小时均值（不区分月份）
+d_all &lt;- d %&gt;% 
+ mutate(time_h = hour(time_ymdh)) %&gt;% 
+ group_by(time_h) %&gt;% 
+ summarise(mean= mean(O3, na.rm=T)) 
+
+
+d %&gt;% 
+  mutate(year = year(time_ymdh),
+         time_h = hour(time_ymdh),
+         time_mt = month(time_ymdh)) %&gt;% 
+  group_by(time_mt, time_h) %&gt;% #按月份计算各小时均值
+  summarise(mean= mean(O3, na.rm=T)) %&gt;% 
+  ggplot(aes(time_h, mean))+
+*  geom_line(color="red2")+ #红线表示各月份的小时均值
+*  geom_line(data=d_all, aes(time_h, mean), inherit.aes=F, color="grey50")+ #灰线表示总体均值
+  facet_wrap(~time_mt)
+
+
+ggsave("xiamen_O3_p2.png", width=642/90, height=336/90, dpi=600) 
+
+```
+---
+## 昼夜趋势：臭氧  
+红线：各月份均值；灰线：总体均值  
+各月份之间存在区别：例如1月份O3浓度低，峰值出现时间晚；6-7月份O3浓度低，峰值出现时间早；9-10月份O3浓度高，峰值出现时间与总体均值类似。  
+
+&lt;img src="figs/xiamen_O3_p2.png" width="834.6" height="436.8" /&gt;
+
+
+---
+class: inverse2, middle, center
+
+# 4. 时间序列分析简介  
+
+---
+## PM2.5数据的时间序列分析
+
+目的：分离出季节周期变化、随机波动，查看PM2.5浓度的长期变化趋势   
+
+
+---
+## 转化为时间序列（`ts`）格式
+
+* 按月份计算均值
+
+```r
+d_pm2.5 &lt;- d |&gt; 
+  mutate(date2 = ymd(date),
+         year = year(date2),
+         month = month(date2)) |&gt; 
+  group_by(year, month) |&gt; 
+  summarise(mean_pm2.5 = mean(PM2.5, na.rm = T)) |&gt; 
+  mutate(year_month = ym(paste(year, month)))
+```
+
+```
+## `summarise()` has grouped output by 'year'. You can override using the
+## `.groups` argument.
+```
+
+---
+## 转化为时间序列（`ts`）格式
+
+* 按月份计算均值
+
+```r
+d_pm2.5 |&gt; 
+ggplot(aes(year_month, mean_pm2.5))+
+  geom_line()
+```
+
+&lt;img src="figs/pm2.5_4yr.png" width="835.5" height="265.5" /&gt;
+
+???
+ggsave("pm2.5_4yr.png", width = 557/90, height = 177/90, dpi = 900)
+
+---
+## 转化为时间序列（`ts`）格式
+
+* 转化为`ts`格式
+
+```r
+d_ts_pm2.5 &lt;- ts(d_pm2.5$mean_pm2.5, 
+   start = zoo::as.yearmon(d_pm2.5$year_month[1]),
+   freq = 12)
+
+class(d_ts_pm2.5) #查看是否已转化为ts格式
+```
+
+```
+## [1] "ts"
+```
+
+---
+
+## 可视化时间序列分析结果   
+
+
+.pull-left[ 
+```r
+plot(decompose(d_ts_pm2.5))
+```
+
+
+&lt;img src="figs/decomp_pm2.5.png" width="506" height="388" /&gt;
+
+]
+
+.pull-right[
+
+* 第1行（observed）：PM2.5的浓度的观测值  
+
+* 第2行（trend）：时间序列分析所分离出来的PM2.5的浓度的长期变化趋势，可以看到PM2.5浓度在持续降低  
+
+* 第3行（seasonal）：PM2.5的浓度的季节周期性变化  
+
+* 第4行（random）：PM2.5的随机变化  
+
+* 从observed中扣除掉seasonal和random趋势，显现出真正的trend  
+
+]
+
+
+
+???
+png("decomp_pm2.5.png", width = 506/90*900, height = 388/90*900, res = 900)
+plot(decompose(d_ts_pm2.5))
+dev.off()
+
+
+---
+## 要点小结  
+
+操作                |函数
+--------------------|---------------------
+将字符转化为时间    |`ymd()`系列   
+                    |`ymd_hms()`系列   
+提取时间信息        |`year()`-年；`month()`-月；`day()`-日
+                    |`hour()`-时；`minute()`-分；`second()`-秒
+                    |第几天：`yday()`-年；`mday()`-月；`wday()`-星期
+坐标轴时间格式设置  |`scale_x_date()`
+                    |`scale_x_datetime()`
+
+
+---
+## 拓展阅读  
+
+https://lubridate.tidyverse.org/
+
+https://r4ds.had.co.nz/dates-and-times.html
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
